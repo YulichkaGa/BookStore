@@ -1,8 +1,10 @@
 # 📚 BookStore
 
-A Full-Stack Book Management Application built with **ASP.NET Core Web API** and **React**.
+A Full-Stack Book Management Application built with ASP.NET Core Web API and React.
 
-The application allows managing books stored in an XML file, including creating, updating, deleting, searching, and generating HTML reports.
+The application manages books stored in an XML file and provides CRUD operations, HTML reporting, API documentation, and automated tests.
+
+---
 
 ## 🚀 Technologies
 
@@ -16,14 +18,16 @@ The application allows managing books stored in an XML file, including creating,
 ### Frontend
 
 * React
-* JavaScript
+* TypeScript
 * Axios
+* Vite
+* CSS
 
 ### Testing
 
 * xUnit
 
-### Storage
+### Data Storage
 
 * XML File
 
@@ -32,13 +36,26 @@ The application allows managing books stored in an XML file, including creating,
 ## ✨ Features
 
 * View all books
-* Get book details by ISBN
-* Add new books
-* Update existing books
-* Delete books
+* Get a book by ISBN
+* Add a new book
+* Update an existing book
+* Delete a book
 * Generate HTML reports
-* Support multiple authors
-* Environment-based XML configuration
+* Support multiple authors per book
+* Environment-based XML file configuration
+
+---
+
+## 📖 Book Properties
+
+Each book contains:
+
+* ISBN
+* Title
+* Author(s)
+* Category
+* Year
+* Price
 
 ---
 
@@ -47,7 +64,7 @@ The application allows managing books stored in an XML file, including creating,
 | Method | Endpoint               | Description          |
 | ------ | ---------------------- | -------------------- |
 | GET    | /api/books             | Get all books        |
-| GET    | /api/books/{isbn}      | Get book by ISBN     |
+| GET    | /api/books/{isbn}      | Get a book by ISBN   |
 | POST   | /api/books             | Create a new book    |
 | PUT    | /api/books/{isbn}      | Update a book        |
 | DELETE | /api/books/{isbn}      | Delete a book        |
@@ -55,19 +72,7 @@ The application allows managing books stored in an XML file, including creating,
 
 ---
 
-## 📸 Screenshots
-
-### Swagger UI
-
-![alt text](image.png)
-
-### React Client
-
-![alt text](image-1.png)
-
----
-
-## ▶️ Run API
+## ▶️ Run the API
 
 ```bash
 cd BookStore.Api
@@ -82,7 +87,7 @@ http://localhost:5066/swagger
 
 ---
 
-## ▶️ Run Client
+## ▶️ Run the Client
 
 ```bash
 cd BookStore.Client
@@ -101,7 +106,22 @@ dotnet test
 
 ---
 
+## 📁 Project Structure
+
+```text
+BookStore
+│
+├── BookStore.Api
+├── BookStore.Client
+├── BookStore.Tests
+├── README.md
+└── .gitignore
+```
+
+---
+
 ## 👩‍💻 Author
 
-**Yuli Garnaga**
+Yuli Garnaga
+
 Senior Full-Stack Developer
