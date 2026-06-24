@@ -28,4 +28,11 @@
     <year>2026</year>
     <price>11</price>
   </book>
+  <book category="213">
+    <isbn>23123</isbn>
+    <title lang="en">231</title>
+    <author>31</author>
+    <year>2026</year>
+    <price>22</price>
+  </book>
 </bookstore>
