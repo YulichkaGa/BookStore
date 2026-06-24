@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<bookstore>
+  <book category="web" cover="paperback">
+    <isbn>9043127323207</isbn>
+    <title lang="en">Learning XML</title>
+    <author>Erik T. Ray</author>
+    <year>2003</year>
+    <price>39.95</price>
+  </book>
+  <book category="213123">
+    <isbn>1</isbn>
+    <title lang="en">231</title>
+    <author>323123</author>
+    <year>2025</year>
+    <price>100</price>
+  </book>
+  <book category="eqweqw">
+    <isbn>12323232</isbn>
+    <title lang="en">wewq</title>
+    <author>qweqwe</author>
+    <year>2025</year>
+    <price>12</price>
+  </book>
+  <book category="231">
+    <isbn>122</isbn>
+    <title lang="en">23</title>
+    <author>123</author>
+    <year>2026</year>
+    <price>11</price>
+  </book>
+</bookstore>
