@@ -9,12 +9,16 @@ export const getBooks = async () => {
     return response.data;
 };
 
-export const deleteBook = async (isbn: string): Promise<void> => {
-    await api.delete(`/books/${isbn}`);
-};
 export const addBook = async (book: any) => {
     await api.post('/books', book);
 };
 
+export const updateBook = async (isbn: string, book: any) => {
+    await api.put(`/books/${isbn}`, book);
+};
+
+export const deleteBook = async (isbn: string): Promise<void> => {
+    await api.delete(`/books/${isbn}`);
+};
 
 export default api;

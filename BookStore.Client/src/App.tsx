@@ -1,58 +1,145 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
+import { Toast } from 'primereact/toast';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
-import { addBook, deleteBook, getBooks } from './services/booksApi';
+import { addBook, deleteBook, getBooks, updateBook } from './services/booksApi';
+
+type Book = {
+    isbn: string;
+    title: string;
+    category: string;
+    authors: string[];
+    year: number;
+    price: number;
+};
+
+const emptyBook: Book = {
+    isbn: '',
+    title: '',
+    category: '',
+    authors: [''],
+    year: new Date().getFullYear(),
+    price: 0
+};
 
 function App() {
-    const [books, setBooks] = useState<any[]>([]);
-    const [visible, setVisible] = useState(false);
+    const toast = useRef<Toast>(null);
 
-    const [newBook, setNewBook] = useState({
-        isbn: '',
-        title: '',
-        category: '',
-        authors: [''],
-        year: 2025,
-        price: 0
-    });
+    const [books, setBooks] = useState<Book[]>([]);
+    const [visible, setVisible] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [bookForm, setBookForm] = useState<Book>(emptyBook);
+    const [loading, setLoading] = useState(false);
+
+    const showMessage = (
+        severity: 'success' | 'info' | 'warn' | 'error',
+        summary: string,
+        detail: string
+    ) => {
+        toast.current?.show({ severity, summary, detail, life: 3000 });
+    };
 
     const loadBooks = async () => {
-        const data = await getBooks();
-        setBooks(data);
+        try {
+            setLoading(true);
+            const data = await getBooks();
+            setBooks(data);
+        } catch {
+            showMessage('error', 'Error', 'Failed to load books');
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        loadBooks().catch(console.error);
+        loadBooks();
     }, []);
 
-    const handleDelete = async (isbn: string) => {
-        await deleteBook(isbn);
-        await loadBooks();
+    const openAddDialog = () => {
+        setBookForm({ ...emptyBook });
+        setIsEditMode(false);
+        setVisible(true);
     };
 
-    const handleAdd = async () => {
-        await addBook(newBook);
-
-        setVisible(false);
-
-        setNewBook({
-            isbn: '',
-            title: '',
-            category: '',
-            authors: [''],
-            year: 2025,
-            price: 0
+    const openEditDialog = (book: Book) => {
+        setBookForm({
+            ...book,
+            authors: book.authors?.length ? book.authors : ['']
         });
 
-        await loadBooks();
+        setIsEditMode(true);
+        setVisible(true);
+    };
+
+    const validateForm = () => {
+        if (!bookForm.isbn.trim()) return 'ISBN is required';
+        if (!bookForm.title.trim()) return 'Title is required';
+        if (!bookForm.category.trim()) return 'Category is required';
+        if (!bookForm.authors[0]?.trim()) return 'Author is required';
+        if (bookForm.year <= 0) return 'Year must be greater than 0';
+        if (bookForm.price <= 0) return 'Price must be greater than 0';
+
+        return '';
+    };
+
+    const handleSave = async () => {
+        const error = validateForm();
+
+        if (error) {
+            showMessage('warn', 'Validation', error);
+            return;
+        }
+
+        try {
+            if (isEditMode) {
+                await updateBook(bookForm.isbn, bookForm);
+                showMessage('success', 'Updated', 'Book updated successfully');
+            } else {
+                await addBook(bookForm);
+                showMessage('success', 'Added', 'Book added successfully');
+            }
+
+            setVisible(false);
+            setBookForm({ ...emptyBook });
+            await loadBooks();
+        } catch (error: any) {
+            showMessage(
+                'error',
+                'Error',
+                error.response?.data?.message || 'Failed to save book'
+            );
+        }
+    };
+
+    const handleDelete = (isbn: string) => {
+        confirmDialog({
+            message: 'Are you sure you want to delete this book?',
+            header: 'Confirm Delete',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Yes',
+            rejectLabel: 'Cancel',
+            accept: async () => {
+                try {
+                    await deleteBook(isbn);
+                    await loadBooks();
+                    showMessage('success', 'Deleted', 'Book deleted successfully');
+                } catch {
+                    showMessage('error', 'Error', 'Failed to delete book');
+                }
+            }
+        });
     };
 
     return (
         <div style={{ padding: '24px' }}>
+            <Toast ref={toast} />
+            <ConfirmDialog />
+
             <h1>Book Store</h1>
 
             <div style={{ marginBottom: '16px', display: 'flex', gap: '10px' }}>
@@ -67,11 +154,18 @@ function App() {
                 <Button
                     label="Add Book"
                     icon="pi pi-plus"
-                    onClick={() => setVisible(true)}
+                    onClick={openAddDialog}
                 />
             </div>
 
-            <DataTable value={books} paginator rows={5} tableStyle={{ minWidth: '50rem' }}>
+            <DataTable
+                value={books}
+                loading={loading}
+                paginator
+                rows={5}
+                tableStyle={{ minWidth: '50rem' }}
+                emptyMessage="No books found"
+            >
                 <Column field="isbn" header="ISBN" />
                 <Column field="title" header="Title" />
                 <Column field="category" header="Category" />
@@ -80,18 +174,26 @@ function App() {
 
                 <Column
                     header="Actions"
-                    body={(rowData) => (
-                        <Button
-                            icon="pi pi-trash"
-                            severity="danger"
-                            onClick={() => handleDelete(rowData.isbn)}
-                        />
+                    body={(rowData: Book) => (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <Button
+                                icon="pi pi-pencil"
+                                severity="info"
+                                onClick={() => openEditDialog(rowData)}
+                            />
+
+                            <Button
+                                icon="pi pi-trash"
+                                severity="danger"
+                                onClick={() => handleDelete(rowData.isbn)}
+                            />
+                        </div>
                     )}
                 />
             </DataTable>
 
             <Dialog
-                header="Add Book"
+                header={isEditMode ? 'Edit Book' : 'Add Book'}
                 visible={visible}
                 style={{ width: '30rem' }}
                 onHide={() => setVisible(false)}
@@ -99,53 +201,58 @@ function App() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <InputText
                         placeholder="ISBN"
-                        value={newBook.isbn}
+                        value={bookForm.isbn}
+                        disabled={isEditMode}
                         onChange={(e) =>
-                            setNewBook({ ...newBook, isbn: e.target.value })
+                            setBookForm({ ...bookForm, isbn: e.target.value })
                         }
                     />
 
                     <InputText
                         placeholder="Title"
-                        value={newBook.title}
+                        value={bookForm.title}
                         onChange={(e) =>
-                            setNewBook({ ...newBook, title: e.target.value })
+                            setBookForm({ ...bookForm, title: e.target.value })
                         }
                     />
 
                     <InputText
                         placeholder="Category"
-                        value={newBook.category}
+                        value={bookForm.category}
                         onChange={(e) =>
-                            setNewBook({ ...newBook, category: e.target.value })
+                            setBookForm({ ...bookForm, category: e.target.value })
                         }
                     />
 
                     <InputText
                         placeholder="Author"
-                        value={newBook.authors[0]}
+                        value={bookForm.authors[0]}
                         onChange={(e) =>
-                            setNewBook({ ...newBook, authors: [e.target.value] })
+                            setBookForm({ ...bookForm, authors: [e.target.value] })
                         }
                     />
 
                     <InputText
                         placeholder="Year"
-                        value={String(newBook.year)}
+                        value={String(bookForm.year)}
                         onChange={(e) =>
-                            setNewBook({ ...newBook, year: Number(e.target.value) })
+                            setBookForm({ ...bookForm, year: Number(e.target.value) })
                         }
                     />
 
                     <InputText
                         placeholder="Price"
-                        value={String(newBook.price)}
+                        value={String(bookForm.price)}
                         onChange={(e) =>
-                            setNewBook({ ...newBook, price: Number(e.target.value) })
+                            setBookForm({ ...bookForm, price: Number(e.target.value) })
                         }
                     />
 
-                    <Button label="Save" icon="pi pi-check" onClick={handleAdd} />
+                    <Button
+                        label={isEditMode ? 'Update' : 'Save'}
+                        icon="pi pi-check"
+                        onClick={handleSave}
+                    />
                 </div>
             </Dialog>
         </div>

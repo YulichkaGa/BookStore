@@ -1,5 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <bookstore>
+	<book category="children">
+		<isbn>9051234567897</isbn>
+		<title lang="en">Harry Potter</title>
+		<author>J K. Rowling</author>
+		<year>2005</year>
+		<price>29.99</price>
+	</book>
 	<book category="web">
 		<isbn>9031234567897</isbn>
 		<title lang="en">XQuery Kick Start</title>
@@ -18,25 +25,5 @@
 		<year>2003</year>
 		<price>39.95</price>
 	</book>
-	<book category="Yulki">
-		<isbn>123423</isbn>
-		<title lang="en">Alisa</title>
-		<author>Yuli Garnaga</author>
-		<year>2026</year>
-		<price>1000</price>
-	</book>
-	<book category="string">
-		<isbn>string</isbn>
-		<title lang="en">string</title>
-		<author>string</author>
-		<year>0</year>
-		<price>0</price>
-	</book>
-	<book category="Comedy">
-		<isbn>9051234567897</isbn>
-		<title lang="en">Yuli and </title>
-		<author>Yuli Garnaga</author>
-		<year>3000</year>
-		<price>999999</price>
-	</book>
 </bookstore>
+
